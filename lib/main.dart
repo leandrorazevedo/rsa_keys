@@ -32,10 +32,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  static const String alias = 'SuperApp_RSA';
+  String pubKey = "";
   String pubKeyAsPem = "";
   String valueEncrypted = "";
   String valueDecrypted = "";
-  late AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> rsaKeyPair;
+
   TextEditingController textController = TextEditingController(text: '5573 2165 5983 0359');
 
   @override
@@ -48,12 +50,9 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: () {
-                rsaKeyPair = generateRSAKeyPair();
-                var publicKey = rsaKeyPair.publicKey;
-                setState(() {
-                  pubKeyAsPem = encodeRSAPublicKeyToPem(publicKey);
-                });
+              onPressed: () async {
+                pubKey = await generateRSAKeyPairAndStore(alias) ?? "";
+                setState(() {});
               },
               child: const Text('Gerar Chaves RSA'),
             ),
@@ -69,10 +68,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      valueEncrypted = rsaEncrypt(textController.text, rsaKeyPair.publicKey);
-                    });
+                  onPressed: () async {
+                    valueEncrypted = await encrypt(alias, textController.text) ?? "";
+                    setState(() {});
                   },
                   child: const Text('Encrypt'),
                 ),
@@ -82,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      valueDecrypted = rsaDecrypt(valueEncrypted, rsaKeyPair.privateKey);
+                      // valueDecrypted = rsaDecrypt(valueEncrypted, rsaKeyPair.privateKey);
                     });
                   },
                   child: const Text('Decrypt'),
@@ -92,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(
               height: 20,
             ),
-            Text(pubKeyAsPem),
+            Text(pubKey),
             const SizedBox(
               height: 20,
             ),
