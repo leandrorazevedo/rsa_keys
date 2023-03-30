@@ -68,9 +68,13 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
     private fun generateRSAKeyPair(alias: String): String? {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
-        val publicKey = keyStore.getCertificate(alias).publicKey
-        if (publicKey != null)
-            return Base64.encodeToString(publicKey.encoded, Base64.DEFAULT)
+
+        val ksAlias = keyStore.getCertificate(alias)
+        if (ksAlias != null) {
+            val publicKey = ksAlias.publicKey
+            if (publicKey != null)
+                return Base64.encodeToString(publicKey.encoded, Base64.DEFAULT)
+        }
 
         val keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore")
         val keyGenParameterSpec = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
