@@ -14,11 +14,12 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
-import java.security.KeyPairGenerator
-import java.security.KeyStore
-import java.security.interfaces.RSAPublicKey
-import java.security.spec.RSAKeyGenParameterSpec
+import java.security.*;
+import java.security.spec.*;
+import java.security.interfaces.*
+import java.math.BigInteger
 import javax.crypto.Cipher
+import java.security.KeyFactory
 
 
 /** XdataSecureRsaPlugin */
@@ -42,11 +43,8 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
             "generateRSAKeyPair" -> {
                 try {
                     val alias = call.argument<String>("alias")
-                    val keyPair = generateRSAKeyPair(alias!!)
-                    val publicKey = keyPair.public
-                    val publicKeyString = Base64.encodeToString(publicKey.encoded, Base64.DEFAULT)
-                    val resultMap = hashMapOf<String, Any>("publicKey" to publicKeyString)
-                    result.success(resultMap)
+                    val publicKey = generateRSAKeyPair(alias!!)
+                    result.success(publicKey)
                 } catch (e: Exception) {
                     result.error("KEY_GENERATION_FAILED", e.message, null)
                 }
@@ -67,7 +65,13 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    private fun generateRSAKeyPair(alias: String): java.security.KeyPair {
+    private fun generateRSAKeyPair(alias: String): String? {
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null)
+        val publicKey = keyStore.getCertificate(alias).publicKey
+        if (publicKey != null)
+            return Base64.encodeToString(publicKey.encoded, Base64.DEFAULT)
+
         val keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore")
         val keyGenParameterSpec = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
             .setKeySize(2048)
@@ -75,24 +79,29 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
             .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
             .build()
         keyPairGenerator.initialize(keyGenParameterSpec)
-        val keyPair = keyPairGenerator.generateKeyPair()
-        return keyPair
+        var pubKey = keyPairGenerator.generateKeyPair().public
+        return Base64.encodeToString(pubKey.encoded, Base64.DEFAULT)
     }
 
-    private fun encrypt(alias: String, message: String): String {
-        val keyStore = KeyStore.getInstance("AndroidKeyStore")
-        keyStore.load(null)
-        val privateKeyEntry = keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
-        val publicKey = privateKeyEntry.certificate.publicKey
+    private fun encrypt(alias: String, message: String): String? {
+        try {
+            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            keyStore.load(null)
+            val privateKeyEntry = keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
+            val privateKey = privateKeyEntry.certificate.publicKey
 
-        val inputBytes = message.toByteArray(Charsets.UTF_8)
-        val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey)
-        val encryptedBytes = cipher.doFinal(inputBytes)
+            // Criptografa os dados
+            val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
+            cipher.init(Cipher.ENCRYPT_MODE, privateKey)
+            val encryptedData = cipher.doFinal(message.toByteArray(Charsets.UTF_8))
 
-        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
+            // Retorna os dados criptografados em formato Base64
+            return Base64.encodeToString(encryptedData, Base64.DEFAULT)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return e.message
+        }
     }
-
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
