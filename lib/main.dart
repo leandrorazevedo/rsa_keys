@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pointycastle/api.dart';
-import 'package:pointycastle/asymmetric/api.dart';
 import 'package:rsa/RSAUtil.dart';
 
 void main() {
@@ -33,10 +31,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const String alias = 'SuperApp_RSA';
+  static const String sessionKey =
+      'dsQoYZesvTrhibGTovxv2I0ekkgIBXf34W53yrg1H/c1JHqVGcuS3vto+l+U5eZ5VJaFHDgomXhkJmNFVzwNdnzF1bB2me9S7mNz9Jx/BvZ6MF3zNV0fWFEKb9cSxIfm8rIugyYZkv4Oa5CVpPRSkx/gOPGG7hV3JdlomH582KNbouO1QVhS0iV8gNIxObZkEPxMxoj+AWJeoQcSgYbSCkPYsfO3MUdNpflnr946z+UCQnNC4MSPIhb0DrBgM3FL4o1A7UIPcjKZeXmoeAbVJH+PqMcetAO7uxwXphcezAjdnFJausS+2KPZJML4+oFRBvwk6wm1Q1unLFxa0RhYRw==';
   String pubKey = "";
   String pubKeyAsPem = "";
   String valueEncrypted = "";
   String valueDecrypted = "";
+  String sessionKeyDecrypted = "";
 
   TextEditingController textController = TextEditingController(text: '5573 2165 5983 0359');
 
@@ -49,12 +50,24 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           children: [
-            ElevatedButton(
-              onPressed: () async {
-                pubKey = await generateRSAKeyPairAndStore(alias) ?? "";
-                setState(() {});
-              },
-              child: const Text('Gerar Chaves RSA'),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    pubKey = await generateRSAKeyPairAndStore(alias) ?? "";
+                    setState(() {});
+                  },
+                  child: const Text('Gerar Chaves RSA'),
+                ),
+                const SizedBox(width: 15),
+                ElevatedButton(
+                  onPressed: () async {
+                    sessionKeyDecrypted = await decrypt(alias, sessionKey) ?? "";
+                    setState(() {});
+                  },
+                  child: const Text('Decrypt Session Key'),
+                ),
+              ],
             ),
             const SizedBox(
               height: 10,
@@ -66,13 +79,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: TextField(
                     controller: textController,
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    valueEncrypted = await encrypt(alias, textController.text) ?? "";
-                    setState(() {});
-                  },
-                  child: const Text('Encrypt'),
                 ),
                 const SizedBox(
                   width: 10,
@@ -90,15 +96,14 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(
               height: 20,
             ),
-            Text(pubKey),
+            SelectableText(pubKey),
             const SizedBox(
               height: 20,
             ),
-            Text(valueEncrypted),
-            SizedBox(
+            SelectableText(sessionKeyDecrypted),
+            const SizedBox(
               height: 10,
             ),
-            Text(valueDecrypted),
           ],
         ),
       ),

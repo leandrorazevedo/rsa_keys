@@ -49,14 +49,14 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
                     result.error("KEY_GENERATION_FAILED", e.message, null)
                 }
             }
-            "encrypt" -> {
-                val alias = call.argument<String>("alias")
-                val message = call.argument<String>("message")
+            "decrypt" -> {
                 try {
-                    val encryptedMessage = encrypt(alias!!, message!!)
-                    result.success(encryptedMessage)
+                    val alias = call.argument<String>("alias")
+                    val encryptedString = call.argument<String>("encryptedString")
+                    val response = decrypt(alias!!, encryptedString!!)
+                    result.success(response)
                 } catch (e: Exception) {
-                    result.error("ENCRYPTION_FAILED", e.message, null)
+                    result.error("DECRYPT_FAILED", e.message, null)
                 }
             }
             else -> {
@@ -87,24 +87,22 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
         return Base64.encodeToString(pubKey.encoded, Base64.DEFAULT)
     }
 
-    private fun encrypt(alias: String, message: String): String? {
-        try {
-            val keyStore = KeyStore.getInstance("AndroidKeyStore")
-            keyStore.load(null)
-            val privateKeyEntry = keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
-            val privateKey = privateKeyEntry.certificate.publicKey
+    private fun decrypt(alias: String, encryptedString: String): String {
+        // Carregando a chave privada da KeyStore
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null)
 
-            // Criptografa os dados
-            val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
-            cipher.init(Cipher.ENCRYPT_MODE, privateKey)
-            val encryptedData = cipher.doFinal(message.toByteArray(Charsets.UTF_8))
+//        val privateKeyEntry = keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
+//        val privateKey = privateKeyEntry.privateKey
+        val privateKey = keyStore.getCertificate(alias).privateKey
 
-            // Retorna os dados criptografados em formato Base64
-            return Base64.encodeToString(encryptedData, Base64.DEFAULT)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return e.message
-        }
+        val cipher = Cipher.getInstance("RSA/NONE/PKCS1Padding")
+        cipher.init(Cipher.DECRYPT_MODE, privateKey)
+
+        val encryptedBytes = Base64.decode(encryptedString, Base64.DEFAULT)
+        val decryptedBytes = cipher.doFinal(encryptedBytes)
+
+        return String(decryptedBytes, charset("UTF-8"))
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {

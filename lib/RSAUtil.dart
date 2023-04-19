@@ -14,13 +14,13 @@ Future<String?> generateRSAKeyPairAndStore(String alias) async {
   }
 }
 
-Future<String?> encrypt(String alias, String message) async {
+Future<String?> decrypt(String alias, String message) async {
   try {
-    final result = await XdataSecureRsa.encrypt(alias, message);
+    final result = await XdataSecureRsa.decrypt(alias, message);
     return result;
-  } catch (e) {
+  } on PlatformException catch (e) {
     if (kDebugMode) {
-      print('Erro ao criptografar a string: ${e.toString()}');
+      print('Erro ao descriptografar: ${e.message}');
     }
     return null;
   }

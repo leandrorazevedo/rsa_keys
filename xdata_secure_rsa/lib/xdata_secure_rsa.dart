@@ -10,12 +10,9 @@ class XdataSecureRsa {
     return response;
   }
 
-  static Future<String?> encrypt(String alias, String message) async {
-    final String? encryptedMessage = await _channel.invokeMethod('encrypt', {
-      'alias': alias,
-      'message': message,
-    });
-    return encryptedMessage;
+  static Future<String?> decrypt(String alias, String encryptedString) async {
+    var response = await _channel.invokeMethod('decrypt', {'alias': alias, 'encryptedString': encryptedString});
+    return response;
   }
 
   Future<String?> getPlatformVersion() {
