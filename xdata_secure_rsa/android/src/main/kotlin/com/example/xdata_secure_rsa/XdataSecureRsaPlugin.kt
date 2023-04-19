@@ -6,7 +6,6 @@ import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.security.keystore.KeyProtection
-import android.util.Base64
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -20,7 +19,7 @@ import java.security.interfaces.*
 import java.math.BigInteger
 import javax.crypto.Cipher
 import java.security.KeyFactory
-
+import java.util.Base64
 
 /** XdataSecureRsaPlugin */
 class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
@@ -73,7 +72,8 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
         if (ksAlias != null) {
             val publicKey = ksAlias.publicKey
             if (publicKey != null)
-                return Base64.encodeToString(publicKey.encoded, Base64.DEFAULT)
+                return Base64.getEncoder().encodeToString(publicKey.encoded)
+//                return Base64.encodeToString(publicKey.encoded, Base64.DEFAULT)
         }
 
         val keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore")
@@ -84,7 +84,8 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
             .build()
         keyPairGenerator.initialize(keyGenParameterSpec)
         var pubKey = keyPairGenerator.generateKeyPair().public
-        return Base64.encodeToString(pubKey.encoded, Base64.DEFAULT)
+        return Base64.getEncoder().encodeToString(pubKey.encoded)
+//        return Base64.encodeToString(pubKey.encoded, Base64.DEFAULT)
     }
 
     private fun decrypt(alias: String, encryptedString: String): String {
@@ -92,14 +93,14 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
 
-//        val privateKeyEntry = keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
-//        val privateKey = privateKeyEntry.privateKey
-        val privateKey = keyStore.getCertificate(alias).privateKey
+        val privateKeyEntry = keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
+        val privateKey = privateKeyEntry.privateKey
 
         val cipher = Cipher.getInstance("RSA/NONE/PKCS1Padding")
         cipher.init(Cipher.DECRYPT_MODE, privateKey)
 
-        val encryptedBytes = Base64.decode(encryptedString, Base64.DEFAULT)
+//        val encryptedBytes = Base64.decode(encryptedString, Base64.DEFAULT)
+        val encryptedBytes = Base64.getDecoder().decode(encryptedString)
         val decryptedBytes = cipher.doFinal(encryptedBytes)
 
         return String(decryptedBytes, charset("UTF-8"))
