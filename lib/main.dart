@@ -32,7 +32,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const String alias = 'SuperApp_RSA';
   static const String sessionKey =
-      'dsQoYZesvTrhibGTovxv2I0ekkgIBXf34W53yrg1H/c1JHqVGcuS3vto+l+U5eZ5VJaFHDgomXhkJmNFVzwNdnzF1bB2me9S7mNz9Jx/BvZ6MF3zNV0fWFEKb9cSxIfm8rIugyYZkv4Oa5CVpPRSkx/gOPGG7hV3JdlomH582KNbouO1QVhS0iV8gNIxObZkEPxMxoj+AWJeoQcSgYbSCkPYsfO3MUdNpflnr946z+UCQnNC4MSPIhb0DrBgM3FL4o1A7UIPcjKZeXmoeAbVJH+PqMcetAO7uxwXphcezAjdnFJausS+2KPZJML4+oFRBvwk6wm1Q1unLFxa0RhYRw==';
+      'LEO8CiUUnF/litKhIB9lD2qPsmfWb/fvd9LBeq1knW/WfCbe+FksQ3i59UMydz7I8HpzB6eP+/Sf2CJ+1VaHzqyv56WMVLVQbByW/v7mzjdZyAsQgAmiQFWZiXbYewYIeKKPycPfZc53n68rHrbyMv5OaiJQAPG3P0VYgKbbRMe+PFskCNTOpgXyMcvfmSAyWM8pktHVXZb9IdFtso1s8VyrcVVRthXYxZEFMUzyBGtmdRJ1Mx3i9B8fjN8wZ7Ehtx7mGrOYQX65Uxy81YeIK/p2lm40BWFcnPtr6SIAy+zsPCuCkkDcHX2oCyH+P8pFVws5UTIzqLyeipO0v7M7NQ==';
   String pubKey = "";
   String pubKeyAsPem = "";
   String valueEncrypted = "";

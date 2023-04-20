@@ -73,7 +73,6 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
             val publicKey = ksAlias.publicKey
             if (publicKey != null)
                 return Base64.getEncoder().encodeToString(publicKey.encoded)
-//                return Base64.encodeToString(publicKey.encoded, Base64.DEFAULT)
         }
 
         val keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore")
@@ -83,27 +82,24 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
             .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
             .build()
         keyPairGenerator.initialize(keyGenParameterSpec)
-        var pubKey = keyPairGenerator.generateKeyPair().public
-        return Base64.getEncoder().encodeToString(pubKey.encoded)
-//        return Base64.encodeToString(pubKey.encoded, Base64.DEFAULT)
+        var publicKey = keyPairGenerator.generateKeyPair().public
+        return Base64.getEncoder().encodeToString(publicKey.encoded)
     }
 
     private fun decrypt(alias: String, encryptedString: String): String {
-        // Carregando a chave privada da KeyStore
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
 
         val privateKeyEntry = keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
         val privateKey = privateKeyEntry.privateKey
 
-        val cipher = Cipher.getInstance("RSA/NONE/PKCS1Padding")
+        val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
         cipher.init(Cipher.DECRYPT_MODE, privateKey)
 
-//        val encryptedBytes = Base64.decode(encryptedString, Base64.DEFAULT)
         val encryptedBytes = Base64.getDecoder().decode(encryptedString)
         val decryptedBytes = cipher.doFinal(encryptedBytes)
 
-        return String(decryptedBytes, charset("UTF-8"))
+        return String(decryptedBytes)
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
