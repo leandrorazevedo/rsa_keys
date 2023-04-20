@@ -78,8 +78,8 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
         val keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore")
         val keyGenParameterSpec = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
             .setKeySize(2048)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-//            .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
+            .setDigests(KeyProperties.DIGEST_SHA1)
             .build()
         keyPairGenerator.initialize(keyGenParameterSpec)
         var publicKey = keyPairGenerator.generateKeyPair().public
@@ -93,7 +93,7 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
         val privateKeyEntry = keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
         val privateKey = privateKeyEntry.privateKey
 
-        val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
+        val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding")
         cipher.init(Cipher.DECRYPT_MODE, privateKey)
 
         val encryptedBytes = Base64.getDecoder().decode(encryptedString)
