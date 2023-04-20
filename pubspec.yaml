@@ -31,9 +31,13 @@ dependencies:
   flutter:
     sdk: flutter
   xdata_secure_rsa:
-      path: ./xdata_secure_rsa
+    path: ./xdata_secure_rsa
   cupertino_icons: ^1.0.2
-  pointycastle: ^3.7.2
+  velocity_x: ^3.6.0
+  encrypt: ^5.0.1
+  get_storage: ^2.1.1
+  get: ^4.6.5
+  dio: ^5.1.1
 
 dev_dependencies:
   flutter_test:

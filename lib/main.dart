@@ -1,7 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:rsa/RSAUtil.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:rsa/Home.dart';
+import 'package:rsa/LoginResultDto.dart';
+import 'package:velocity_x/velocity_x.dart';
 
-void main() {
+void main() async {
+  await GetStorage.init();
   runApp(const MyApp());
 }
 
@@ -10,10 +16,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.indigo,
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -31,14 +42,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const String alias = 'SuperApp_RSA';
-  String pubKey = "";
-  String pubKeyAsPem = "";
-  String valueEncrypted = "";
-  String valueDecrypted = "";
-  String sessionKeyDecrypted = "";
 
-  TextEditingController cardController = TextEditingController(text: '5573 2165 5983 0359');
-  TextEditingController sessionKeyController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -46,79 +52,47 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    pubKey = await generateRSAKeyPairAndStore(alias) ?? "";
-                    setState(() {});
-                  },
-                  child: const Text('Gerar Chaves RSA'),
-                ),
-              ],
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                label: "e-mail".text.make(),
+              ),
             ),
-            const SizedBox(
-              height: 10,
+            16.heightBox,
+            TextField(
+              controller: passwordController,
+              decoration: InputDecoration(
+                label: "password".text.make(),
+              ),
             ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 220,
-                  child: TextField(
-                    controller: sessionKeyController,
-                    decoration: const InputDecoration(labelText: 'Session Key'),
-                  ),
-                ),
-                const SizedBox(
-                  width: 5,
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    sessionKeyDecrypted = await decrypt(alias, sessionKeyController.text) ?? "";
-                    setState(() {});
-                  },
-                  child: const Text('Decrypt Session Key'),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 220,
-                  child: TextField(
-                    controller: cardController,
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      // valueDecrypted = rsaDecrypt(valueEncrypted, rsaKeyPair.privateKey);
-                    });
-                  },
-                  child: const Text('Decrypt'),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            SelectableText(pubKey),
-            const SizedBox(
-              height: 20,
-            ),
-            SelectableText(sessionKeyDecrypted),
-            const SizedBox(
-              height: 10,
-            ),
+            16.heightBox,
+            ElevatedButton(
+              onPressed: login,
+              child: "Login".text.make(),
+            )
           ],
         ),
       ),
     );
+  }
+
+  Future<void> login() async {
+    final dio = Dio();
+    var response = await dio.post('https://dev.xdatasolucoes.com.br:9091/auth/login', data: {
+      'email': emailController.text,
+      'password': passwordController.text,
+    });
+    if (response.statusCode == 200) {
+      var login = LoginResult.fromJson(response.data);
+      final box = GetStorage();
+      box.write('session', login);
+
+      Get.to(const HomeScreen());
+    }
   }
 }
