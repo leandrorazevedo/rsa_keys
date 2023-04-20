@@ -79,7 +79,7 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
         val keyGenParameterSpec = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
             .setKeySize(2048)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-            .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+//            .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
             .build()
         keyPairGenerator.initialize(keyGenParameterSpec)
         var publicKey = keyPairGenerator.generateKeyPair().public
@@ -99,7 +99,7 @@ class XdataSecureRsaPlugin : FlutterPlugin, MethodCallHandler {
         val encryptedBytes = Base64.getDecoder().decode(encryptedString)
         val decryptedBytes = cipher.doFinal(encryptedBytes)
 
-        return String(decryptedBytes)
+        return Base64.getEncoder().encodeToString(decryptedBytes)
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
