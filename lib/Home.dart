@@ -15,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   static const String alias = 'SuperApp_RSA';
-  var publicKey = "";
   var sessionKey = "";
   String valueEncrypted = "";
 
@@ -27,27 +26,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: "Home".text.makeCentered(),
+        centerTitle: true,
+        title: "Home".text.make(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    publicKey = await generateRSAKeyPairAndStore(alias) ?? "";
-                    box.write('publicKey', publicKey);
-                    setState(() {});
-                  },
-                  child: const Text('Gerar Chaves RSA'),
-                ),
-              ],
-            ),
-            SelectableText(publicKey),
-            16.heightBox,
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -65,6 +50,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Column(
               children: [
                 TextField(
+                  decoration: InputDecoration(
+                    label: "Digite um valor para criptografar com a session key".text.make(),
+                  ),
                   controller: valueToEncryptController,
                 ),
                 const SizedBox(

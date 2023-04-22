@@ -6,6 +6,9 @@ import 'package:rsa/Home.dart';
 import 'package:rsa/LoginResultDto.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+import 'DeviceInfo.dart';
+import 'RSAUtil.dart';
+
 void main() async {
   await GetStorage.init();
   runApp(const MyApp());
@@ -32,19 +35,22 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
   final String title;
+
+  const MyHomePage({super.key, required this.title});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const String alias = 'SuperApp_RSA';
+  TextEditingController emailController = TextEditingController(text: 'leandrorazevedo@gmail.com');
+  TextEditingController passwordController = TextEditingController(text: '123456');
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  static const String alias = 'SuperApp_RSA';
+  var publicKey = "";
+
+  final box = GetStorage();
 
   @override
   Widget build(BuildContext context) {
@@ -71,10 +77,33 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             16.heightBox,
-            ElevatedButton(
-              onPressed: login,
-              child: "Login".text.make(),
-            )
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: login,
+                  child: "Login".text.make(),
+                ),
+                16.widthBox,
+                ElevatedButton(
+                  onPressed: () async {
+                    publicKey = await generateRSAKeyPairAndStore(alias) ?? "";
+                    box.write('publicKey', publicKey);
+                    setState(() {});
+                  },
+                  child: const Text('Gerar Chaves RSA'),
+                ),
+                16.widthBox,
+                ElevatedButton(
+                  onPressed: () {
+                    Get.to(const DeviceInfoScreen());
+                  },
+                  child: const Text('Device Info'),
+                ),
+              ],
+            ),
+            SelectableText(publicKey),
+            16.heightBox,
           ],
         ),
       ),
@@ -83,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> login() async {
     final dio = Dio();
-    var response = await dio.post('https://dev.xdatasolucoes.com.br:9091/auth/login', data: {
+    var response = await dio.post('https://949f-177-30-89-181.ngrok-free.app/auth/login', data: {
       'email': emailController.text,
       'password': passwordController.text,
     });
