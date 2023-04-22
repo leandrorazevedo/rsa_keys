@@ -7,6 +7,7 @@ import 'package:rsa/LoginResultDto.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import 'DeviceInfo.dart';
+import 'DeviceInfoUtils.dart';
 import 'RSAUtil.dart';
 
 void main() async {
@@ -49,11 +50,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static const String alias = 'SuperApp_RSA';
   var publicKey = "";
-
+  var deviceId = "";
   final box = GetStorage();
 
   @override
   Widget build(BuildContext context) {
+    Future.delayed(Duration.zero, () async {
+      deviceId = await DeviceInfoUtils.getDeviceId() ?? "";
+    });
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -75,6 +79,12 @@ class _MyHomePageState extends State<MyHomePage> {
               decoration: InputDecoration(
                 label: "password".text.make(),
               ),
+            ),
+            16.heightBox,
+            Row(
+              children: [
+                Text("Device ID : $deviceId"),
+              ],
             ),
             16.heightBox,
             Row(
@@ -115,6 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
     var response = await dio.post('https://949f-177-30-89-181.ngrok-free.app/auth/login', data: {
       'email': emailController.text,
       'password': passwordController.text,
+      'deviceId': deviceId,
     });
     if (response.statusCode == 200) {
       var login = LoginResult.fromJson(response.data);

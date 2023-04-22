@@ -16,7 +16,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   static const String alias = 'SuperApp_RSA';
   var sessionKey = "";
-  String valueEncrypted = "";
+  var valueEncrypted = "";
+  var accessToken = "";
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: "Home".text.make(),
+        title: "Utilitários".text.make(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -41,11 +42,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     sessionKey = await decrypt(alias, session.sessionKey ?? "") ?? "";
                     setState(() {});
                   },
-                  child: const Text('Show Session Key'),
+                  child: const Text('Get Session Key'),
+                ),
+                16.widthBox,
+                ElevatedButton(
+                  onPressed: () async {
+                    accessToken = session.accessToken ?? "";
+                    setState(() {});
+                  },
+                  child: const Text('Show Access Token'),
                 ),
               ],
             ),
             SelectableText(sessionKey),
+            16.heightBox,
+            SelectableText(accessToken),
             16.heightBox,
             Column(
               children: [
@@ -65,9 +76,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       return;
                     }
 
-                    final response = SecurityHelper.encryptWithAES(sessionKey, valueToEncryptController.text);
-                    valueEncrypted = response.base64;
-                    setState(() {});
+                    if (valueToEncryptController.text != "") {
+                      final response = SecurityHelper.encryptWithAES(sessionKey, valueToEncryptController.text);
+                      valueEncrypted = response.base64;
+                      setState(() {});
+                    }
                   },
                   child: const Text('Encrypt with session key'),
                 ),
