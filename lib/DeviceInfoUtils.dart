@@ -9,10 +9,10 @@ class DeviceInfoUtils {
 
     if (Platform.isIOS) {
       var iosDeviceInfo = await deviceInfo.iosInfo;
-      result = iosDeviceInfo.identifierForVendor; // unique ID on iOS
+      result = iosDeviceInfo.identifierForVendor;
     } else if (Platform.isAndroid) {
       var androidDeviceInfo = await deviceInfo.androidInfo;
-      result = androidDeviceInfo.id; // unique ID on Android
+      result = androidDeviceInfo.id;
     }
     return result;
   }

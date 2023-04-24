@@ -54,10 +54,17 @@ class _MyHomePageState extends State<MyHomePage> {
   final box = GetStorage();
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    debugPrint("Init State");
     Future.delayed(Duration.zero, () async {
       deviceId = await DeviceInfoUtils.getDeviceId() ?? "";
+      setState(() {});
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
