@@ -12,6 +12,13 @@ import 'RSAUtil.dart';
 
 void main() async {
   await GetStorage.init();
+
+  final box = GetStorage();
+  var url = box.read('url_api');
+  if (url == '') {
+    box.write('url_api', 'https://dev.xdatasolucoes.com.br:9091');
+  }
+
   runApp(const MyApp());
 }
 
@@ -45,18 +52,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final box = GetStorage();
+
   TextEditingController emailController = TextEditingController(text: 'leandrorazevedo@gmail.com');
   TextEditingController passwordController = TextEditingController(text: '123456');
+  TextEditingController urlApiController = TextEditingController();
 
   static const String alias = 'SuperApp_RSA';
   var publicKey = "";
   var deviceId = "";
-  final box = GetStorage();
 
   @override
   void initState() {
     super.initState();
-    debugPrint("Init State");
+    urlApiController.text = box.read('url_api');
     Future.delayed(Duration.zero, () async {
       deviceId = await DeviceInfoUtils.getDeviceId() ?? "";
       setState(() {});
@@ -72,53 +81,67 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                label: "e-mail".text.make(),
+            VStack([
+              TextField(
+                controller: urlApiController,
+                decoration: InputDecoration(
+                  label: "API URL".text.make(),
+                ),
+                onChanged: (String value) {
+                  box.write('url_api', value);
+                },
               ),
-            ),
+            ]),
             16.heightBox,
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(
-                label: "password".text.make(),
+            VStack([
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  label: "e-mail".text.make(),
+                ),
               ),
-            ),
+              16.heightBox,
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(
+                  label: "password".text.make(),
+                ),
+              ),
+              16.heightBox,
+              Row(
+                children: [
+                  SelectableText("Device ID : $deviceId"),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: login,
+                    child: "Login".text.make(),
+                  ),
+                  16.widthBox,
+                  ElevatedButton(
+                    onPressed: () async {
+                      publicKey = await generateRSAKeyPairAndStore(alias) ?? "";
+                      box.write('publicKey', publicKey);
+                      setState(() {});
+                    },
+                    child: const Text('Gerar Chaves RSA'),
+                  ),
+                  16.widthBox,
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.to(const DeviceInfoScreen());
+                    },
+                    child: const Text('Device Info'),
+                  ),
+                ],
+              ),
+            ]),
             16.heightBox,
-            Row(
-              children: [
-                Text("Device ID : $deviceId"),
-              ],
-            ),
-            16.heightBox,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: login,
-                  child: "Login".text.make(),
-                ),
-                16.widthBox,
-                ElevatedButton(
-                  onPressed: () async {
-                    publicKey = await generateRSAKeyPairAndStore(alias) ?? "";
-                    box.write('publicKey', publicKey);
-                    setState(() {});
-                  },
-                  child: const Text('Gerar Chaves RSA'),
-                ),
-                16.widthBox,
-                ElevatedButton(
-                  onPressed: () {
-                    Get.to(const DeviceInfoScreen());
-                  },
-                  child: const Text('Device Info'),
-                ),
-              ],
-            ),
             SelectableText(publicKey),
             16.heightBox,
           ],
@@ -129,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> login() async {
     final dio = Dio();
-    var response = await dio.post('https://dev.xdatasolucoes.com.br:9091/auth/login', data: {
+    var response = await dio.post('${box.read('url_api')}/auth/login', data: {
       'email': emailController.text,
       'password': passwordController.text,
       'deviceId': deviceId,
