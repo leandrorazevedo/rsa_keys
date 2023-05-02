@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:rsa/Home.dart';
 import 'package:rsa/LoginResultDto.dart';
+import 'package:rsa/realm/Realm.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import 'DeviceInfo.dart';
@@ -15,7 +16,7 @@ void main() async {
 
   final box = GetStorage();
   var url = box.read('url_api');
-  if (url == '') {
+  if (url == '' || url == null) {
     box.write('url_api', 'https://dev.xdatasolucoes.com.br:9091');
   }
 
@@ -115,30 +116,40 @@ class _MyHomePageState extends State<MyHomePage> {
                   SelectableText("Device ID : $deviceId"),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: login,
-                    child: "Login".text.make(),
-                  ),
-                  16.widthBox,
-                  ElevatedButton(
-                    onPressed: () async {
-                      publicKey = await generateRSAKeyPairAndStore(alias) ?? "";
-                      box.write('publicKey', publicKey);
-                      setState(() {});
-                    },
-                    child: const Text('Gerar Chaves RSA'),
-                  ),
-                  16.widthBox,
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.to(const DeviceInfoScreen());
-                    },
-                    child: const Text('Device Info'),
-                  ),
-                ],
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: login,
+                      child: "Login".text.make(),
+                    ),
+                    8.widthBox,
+                    ElevatedButton(
+                      onPressed: () async {
+                        publicKey = await generateRSAKeyPairAndStore(alias) ?? "";
+                        box.write('publicKey', publicKey);
+                        setState(() {});
+                      },
+                      child: const Text('Gerar Chaves RSA'),
+                    ),
+                    8.widthBox,
+                    ElevatedButton(
+                      onPressed: () {
+                        Get.to(const DeviceInfoScreen());
+                      },
+                      child: const Text('Device Info'),
+                    ),
+                    8.widthBox,
+                    ElevatedButton(
+                      onPressed: () {
+                        Get.to(const RealmScreen());
+                      },
+                      child: const Text('Realm'),
+                    ),
+                  ],
+                ),
               ),
             ]),
             16.heightBox,
