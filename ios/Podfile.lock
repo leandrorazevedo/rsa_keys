@@ -5,6 +5,8 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - realm (1.0.3):
+    - Flutter
   - SwiftyRSA (1.7.0):
     - SwiftyRSA/ObjC (= 1.7.0)
   - SwiftyRSA/ObjC (1.7.0)
@@ -16,6 +18,7 @@ DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
+  - realm (from `.symlinks/plugins/realm/ios`)
   - xdata_secure_rsa (from `.symlinks/plugins/xdata_secure_rsa/ios`)
 
 SPEC REPOS:
@@ -29,6 +32,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/ios"
+  realm:
+    :path: ".symlinks/plugins/realm/ios"
   xdata_secure_rsa:
     :path: ".symlinks/plugins/xdata_secure_rsa/ios"
 
@@ -36,6 +41,7 @@ SPEC CHECKSUMS:
   device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9
+  realm: 5c8c46cb0dddd60837ced9d760dfad0b7ff6ae40
   SwiftyRSA: 8c6dd1ea7db1b8dc4fb517a202f88bb1354bc2c6
   xdata_secure_rsa: 10c2d874b614fc345ad1a0c9cf6e7b1a8713dd75
 

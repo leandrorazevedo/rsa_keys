@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:realm/realm.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-import 'Car.dart';
+import 'schemas.dart';
 
 class RealmScreen extends StatefulWidget {
   const RealmScreen({Key? key}) : super(key: key);
@@ -22,10 +20,28 @@ class _RealmScreenState extends State<RealmScreen> {
   List<Car>? carsResult;
   StreamSubscription<RealmResultsChanges<Car>>? subscription;
 
-  @override
-  void initState() {
-    final config = Configuration.local([Car.schema]);
-    realm = Realm(config);
+  Future<void> connectToRealm() async {
+    var appConfig = AppConfiguration("poc-realm-xhyak");
+    var app = App(appConfig);
+
+    final apiKeyCredentials = Credentials.apiKey("KXjQzhnlwasx3wWhYYRa6CPxebGzrV847x0MyKQCVHCcuWIpYcqMznmOLkjCVbTq");
+    final currentUser = await app.logIn(apiKeyCredentials);
+
+    final config = Configuration.flexibleSync(currentUser, [Car.schema]);
+    realm = await Realm.open(config);
+
+    // Add subscriptions
+    realm.subscriptions.update((mutableSubscriptions) {
+      // Get Cars from Atlas that match the Realm Query Language query.
+      // Uses the queryable field `miles`.
+      // Query matches cars with less than 100 miles or `null` miles.
+      final allCars = realm.all<Car>();
+      mutableSubscriptions.add(allCars);
+    });
+    await realm.subscriptions.waitForSynchronization();
+
+    // final config = Configuration.local([Car.schema]);
+    // realm = Realm(config);
 
     allCars = realm.all<Car>();
     subscription = allCars!.changes.listen((event) {
@@ -33,7 +49,11 @@ class _RealmScreenState extends State<RealmScreen> {
         carsResult = event.results.toList();
       });
     });
+  }
 
+  @override
+  void initState() {
+    connectToRealm();
     super.initState();
   }
 
@@ -41,11 +61,16 @@ class _RealmScreenState extends State<RealmScreen> {
   Future<void> dispose() async {
     super.dispose();
     await subscription!.cancel();
+    realm.subscriptions.update((MutableSubscriptionSet mutableSubscriptions) {
+      mutableSubscriptions.removeByType<Car>();
+    });
+
     realm.close();
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(allCars?.length.toString());
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -53,6 +78,7 @@ class _RealmScreenState extends State<RealmScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          setState(() {});
           final car = Car(ObjectId(), 'Tesla', model: 'Model S', miles: 42);
           realm.write(() {
             realm.add(car);
@@ -62,7 +88,7 @@ class _RealmScreenState extends State<RealmScreen> {
       ),
       body: SafeArea(
         child: carsResult == null
-            ? "Liza vazia".text.makeCentered()
+            ? "Lista vazia".text.makeCentered()
             : ListView.builder(
                 itemCount: carsResult!.length,
                 itemBuilder: (_, index) {

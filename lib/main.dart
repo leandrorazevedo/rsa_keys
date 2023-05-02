@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:rsa/Home.dart';
 import 'package:rsa/LoginResultDto.dart';
-import 'package:rsa/realm/Realm.dart';
+import 'package:rsa/realm/realm_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import 'DeviceInfo.dart';
