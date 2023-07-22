@@ -12,7 +12,7 @@ public class XdataSecureRsaPlugin: NSObject, FlutterPlugin {
         let instance = XdataSecureRsaPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         if call.method == "generateRSAKeyPair" {
             guard let args = call.arguments as? [String: Any],
@@ -20,7 +20,7 @@ public class XdataSecureRsaPlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
                 return
             }
-            
+
             do {
                 let publicKey = try generateRSAKeyPairAndStore(alias: alias)
                 result(publicKey)
@@ -34,7 +34,7 @@ public class XdataSecureRsaPlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
                 return
             }
-            
+
             do {
                 let decryptedMessage = try decrypt(alias: alias, encryptedString: encryptedString)
                 result(decryptedMessage)
@@ -45,7 +45,7 @@ public class XdataSecureRsaPlugin: NSObject, FlutterPlugin {
             result(FlutterMethodNotImplemented)
         }
     }
-    
+
     private func generateRSAKeyPairAndStore(alias: String) -> String? {
 
         if let existingPublicKey = getPublicKey(tag: alias) {
@@ -78,16 +78,22 @@ public class XdataSecureRsaPlugin: NSObject, FlutterPlugin {
         ]
 
         var error: Unmanaged<CFError>?
+
         guard let secKey = SecKeyCreateRandomKey(parameters as CFDictionary, &error) else {
             return nil
         }
 
-        let publicKey = SecKeyCopyPublicKey(secKey)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) {}
 
-        let privateKeyData = SecKeyCopyExternalRepresentation(publicKey!, nil)
+        guard let publicKey = SecKeyCopyPublicKey(secKey) else {
+            return nil
+        }
 
-        let x509Data = publicKeyDataX509(publicKey: privateKeyData  as! SecKey)
-        return x509Data!.base64EncodedString()
+        guard let x509Data = publicKeyDataX509(publicKey: publicKey) else {
+            return nil
+        }
+
+        return x509Data.base64EncodedString()
     }
 
     private func decrypt(alias: String, encryptedString: String) throws -> String? {

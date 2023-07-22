@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController passwordController = TextEditingController(text: '123456');
   TextEditingController urlApiController = TextEditingController();
 
-  static const String alias = 'SuperApp_RSA';
+  static const String alias = 'rsa-key';
   var publicKey = "";
   var deviceId = "";
 
@@ -111,10 +111,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               16.heightBox,
-              Row(
-                children: [
-                  SelectableText("Device ID : $deviceId"),
-                ],
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    SelectableText("Device ID : $deviceId"),
+                  ],
+                ),
               ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
